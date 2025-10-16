@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Training - Intro Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .quiz-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .quiz-body {
+            background: white;
+            padding: 2rem;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option {
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 0.8rem;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .option label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .explanation {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: #004085;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .explanation h4 {
+            color: #0066cc;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-screen {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .results-screen.show {
+            display: block;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem auto;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .score-max {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .results-screen h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+        }
+
+        .results-message {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: left;
+            margin: 2rem 0;
+        }
+
+        .summary-box h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn-start-training {
+            background: #28a745;
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .btn-start-training:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .quiz-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .score-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .score-number {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <h1>🎓 Intro Quiz</h1>
+            <p>Test je AI kennis voordat we starten!</p>
+        </div>
+
+        <div class="quiz-body">
+            <!-- Quiz Content -->
+            <div id="quiz-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress" style="width: 0%"></div>
+                </div>
+
+                <div id="question-container">
+                    <!-- Questions will be inserted here -->
+                </div>
+
+                <div class="btn-container">
+                    <button class="btn btn-next" id="btn-next" onclick="nextQuestion()" disabled>
+                        Volgende vraag →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="results-screen" class="results-screen">
+                <div class="score-circle">
+                    <div class="score-number" id="final-score">0</div>
+                    <div class="score-max">/ 5</div>
+                </div>
+
+                <h2 id="result-title">Goed gedaan!</h2>
+                <p class="results-message" id="result-message"></p>
+
+                <div class="summary-box">
+                    <h4>📊 Jouw Resultaten:</h4>
+                    <div id="summary-content"></div>
+                </div>
+
+                <p style="color: #666; margin: 1.5rem 0;">
+                    🚀 Je bent nu klaar voor de training! We gaan dieper in op alle onderwerpen.
+                </p>
+
+                <button class="btn btn-start-training" onclick="startTraining()">
+                    Start de Training! 🎯
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                type: "multiple",
+                question: "Wat is het verschil tussen AI en Machine Learning?",
+                options: [
+                    "Er is geen verschil, het zijn dezelfde dingen",
+                    "AI is breder - ML is een onderdeel van AI",
+                    "Machine Learning is breder dan AI",
+                    "Ze worden gebruikt voor volledig verschillende dingen"
+                ],
+                correct: 1,
+                explanation: "AI is het bredere concept van intelligente machines. Machine Learning is een SOORT AI waarbij systemen leren van data. Dus ML ⊂ AI."
+            },
+            {
+                id: 2,
+                type: "truefalse",
+                question: "Waar of Onwaar: ChatGPT kent alles wat er op internet staat en geeft altijd correcte informatie.",
+                options: [
+                    "Waar",
+                    "Onwaar"
+                ],
+                correct: 1,
+                explanation: "ONWAAR! ChatGPT heeft een kennisgrens (januari 2025), en kan 'hallucinations' maken - het verzint soms dingen die klinken als waarheid maar niet zijn. Altijd verificatie!"
+            },
+            {
+                id: 3,
+                type: "multiple",
+                question: "Je wilt ChatGPT gebruiken om een verdacht email te analyseren op phishing. Wat is het GROOTSTE risico?",
+                options: [
+                    "ChatGPT weigert altijd phishing emails te analyseren",
+                    "Het kan vertrouwelijke informatie uit de email leren/opslaan",
+                    "ChatGPT is niet goed genoeg voor dit soort werk",
+                    "Er is geen risico, je mag alles in AI tools zetten"
+                ],
+                correct: 1,
+                explanation: "Groot risico: Alles wat je in AI tools invoert kan door OpenAI/Anthropic worden opgeslagen en gebruikt. NOOIT vertrouwelijke politiedata delen!"
+            },
+            {
+                id: 4,
+                type: "multiple",
+                question: "Je ziet een video waar een politicus schijnbaar racistische dingen zegt. Wat is je EERSTE actie?",
+                options: [
+                    "Direct delen op social media - de waarheid moet eruit!",
+                    "Verificatie: Is het echt? Deepfake? Uit context?",
+                    "De video blokkeren - het kan niet waar zijn",
+                    "Wachten tot mainstream media het bevestigt"
+                ],
+                correct: 1,
+                explanation: "Altijd EERST verificatie, daarna delen! 'Verify Before Amplify' - ook als je zeker bent. Deepfakes worden steeds beter en kunnen massaal schade aanrichten."
+            },
+            {
+                id: 5,
+                type: "truefalse",
+                question: "Waar of Onwaar: Deepfakes zijn altijd makkelijk herkenbaar door onnatuurlijke bewegingen of gezichtsuitdrukkingen.",
+                options: [
+                    "Waar",
+                    "Onwaar"
+                ],
+                correct: 1,
+                explanation: "ONWAAR! Moderne deepfakes zijn steeds moeilijker te onderscheiden. De beste deepfakes zien er bijna perfect uit. Dit is waarom verificatie, context-checking en multiple bronnen essentieel zijn!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+
+        function initQuiz() {
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const q = questions[currentQuestion];
+            const html = `
+                <div class="question-number">Vraag ${currentQuestion + 1} van ${questions.length}</div>
+                <div class="question-text">${q.question}</div>
+                <div class="options">
+                    ${q.options.map((opt, idx) => `
+                        <div class="option" onclick="selectOption(${idx})">
+                            <label>
+                                <input type="radio" name="option" value="${idx}" onchange="enableNextBtn()">
+                                ${opt}
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="explanation" id="explanation"></div>
+            `;
+            document.getElementById('question-container').innerHTML = html;
+            
+            // Update progress
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function selectOption(idx) {
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Remove previous selection styling
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            // Mark selected option
+            options[idx].classList.add('selected');
+            
+            // Check if correct
+            if (idx === q.correct) {
+                options[idx].classList.add('correct');
+                if (!answers[currentQuestion]) {
+                    score++;
+                }
+            } else {
+                options[idx].classList.add('incorrect');
+                options[q.correct].classList.add('correct');
+            }
+            
+            // Show explanation
+            const explanation = document.getElementById('explanation');
+            explanation.innerHTML = `
+                <h4>${idx === q.correct ? '✓ Correct!' : '✗ Niet helemaal...'}</h4>
+                <p>${q.explanation}</p>
+            `;
+            explanation.classList.add('show');
+            
+            // Store answer
+            answers[currentQuestion] = {
+                selected: idx,
+                correct: q.correct,
+                isCorrect: idx === q.correct
+            };
+        }
+
+        function enableNextBtn() {
+            const selected = document.querySelector('input[name="option"]:checked');
+            document.getElementById('btn-next').disabled = !selected;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+                document.getElementById('btn-next').disabled = true;
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-content').style.display = 'none';
+            document.getElementById('results-screen').classList.add('show');
+
+            // Set score
+            document.getElementById('final-score').textContent = score;
+
+            // Set message based on score
+            let title, message;
+            if (score === 5) {
+                title = "🌟 Perfect Score!";
+                message = "Wow! Je weet al veel van AI. Je bent goed voorbereid voor deze training!";
+            } else if (score >= 4) {
+                title = "🎉 Erg Goed!";
+                message = "Je hebt aanzienlijke kennis. Perfect moment om je te verdiepen in de fijne details!";
+            } else if (score >= 3) {
+                title = "👍 Goed!";
+                message = "Je basis is in orde. Deze training gaat je veel nieuwe inzichten geven!";
+            } else if (score >= 2) {
+                title = "📚 Leermoment!";
+                message = "Geen zorgen - deze training is er speciaal voor jou! We starten bij de basis.";
+            } else {
+                title = "🚀 Fresh Start!";
+                message = "Perfecte gelegenheid om AI helemaal van nul af aan te leren. Laten we gaan!";
+            }
+
+            document.getElementById('result-title').textContent = title;
+            document.getElementById('result-message').textContent = message;
+
+            // Create summary
+            let summary = '';
+            questions.forEach((q, idx) => {
+                const ans = answers[idx];
+                const status = ans.isCorrect ? '✓' : '✗';
+                const icon = ans.isCorrect ? '🟢' : '🔴';
+                summary += `
+                    <div class="summary-item">
+                        <span>${icon} Vraag ${idx + 1}</span>
+                        <span>${status}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('summary-content').innerHTML = summary;
+        }
+
+        function startTraining() {
+            window.location.href = 'index.html'; // Link naar je hoofdtraining
+            // Of als je wilt dat het in dezelfde pagina blijft:
+            // alert('Training begint nu! 🎯');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initQuiz);
+    </script>
+</body>
+</html>
